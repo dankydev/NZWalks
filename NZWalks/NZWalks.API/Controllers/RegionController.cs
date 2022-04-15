@@ -24,6 +24,10 @@ namespace NZWalks.API.Controllers
             var regions = await regionRepository.GetAllAsync();
             var regionDTOs = mapper.Map<List<Models.DTO.Region>>(regions);
 
+            if (!regionDTOs.Any()) { 
+                return NoContent();
+            }
+
             return Ok(regionDTOs);
         }
 
@@ -45,14 +49,7 @@ namespace NZWalks.API.Controllers
         public async Task<IActionResult> AddRegionAsync([FromBody] AddRegionRequest request) 
         {
             // Request to domain model
-            var region = new Models.Domain.Region() { 
-                Area = request.Area,
-                Name = request.Name,
-                Code = request.Code,
-                Latitude = request.Latitude,
-                Longitude = request.Longitude,
-                Population = request.Population,
-            };
+            var region = mapper.Map<Models.Domain.Region>(request);
 
             // Use repository
             region = await regionRepository.AddAsync(region);
@@ -80,15 +77,7 @@ namespace NZWalks.API.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateRegionAsync([FromRoute] Guid id, [FromBody] UpdateRegionRequest request)
         {
-            var region = new Models.Domain.Region()
-            {
-                Area = request.Area,
-                Name = request.Name,
-                Code = request.Code,
-                Latitude = request.Latitude,
-                Longitude = request.Longitude,
-                Population = request.Population,
-            };
+            var region = mapper.Map<Models.Domain.Region>(request);
             var updatedRegion = await regionRepository.UpdateAsync(id, region);
             if (updatedRegion == null)
                 return NotFound();

@@ -1,16 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
+using AutoMapper;
 
 namespace NZWalks.API.Repositories
 {
     public class RegionRepository : IRegionRepository
     {
         private readonly NZWalksDbContext nZWalksDbContext;
+        private readonly IMapper mapper;
 
-        public RegionRepository(NZWalksDbContext nZWalksDbContext)
+        public RegionRepository(NZWalksDbContext nZWalksDbContext, IMapper mapper)
         {
             this.nZWalksDbContext = nZWalksDbContext;
+            this.mapper = mapper;
         }
 
         public async Task<IEnumerable<Region?>> GetAllAsync()
@@ -49,6 +52,9 @@ namespace NZWalks.API.Repositories
             if (regionToUpdate == null)
                 return null;
 
+
+            // regionToUpdate = mapper.Map<Region?>(region);
+            // TODO: AutoMapper doesn't work, why?
             regionToUpdate.Latitude = region.Latitude;
             regionToUpdate.Longitude = region.Longitude;
             regionToUpdate.Population = region.Population;
