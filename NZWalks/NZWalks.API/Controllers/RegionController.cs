@@ -24,9 +24,9 @@ namespace NZWalks.API.Controllers
             var regions = await regionRepository.GetAllAsync();
             var regionDTOs = mapper.Map<List<Models.DTO.Region>>(regions);
 
-            if (!regionDTOs.Any()) { 
+            if (!regionDTOs.Any()) 
                 return NoContent();
-            }
+            
 
             return Ok(regionDTOs);
         }
@@ -36,9 +36,9 @@ namespace NZWalks.API.Controllers
         [ActionName("GetRegionAsync")]
         public async Task<IActionResult> GetRegionAsync([FromRoute] Guid id) {
             var region = await regionRepository.GetAsync(id);
-            if (region == null) { 
+            if (region == null) 
                 return NotFound();
-            }
+            
 
             var regionDTO = mapper.Map<Models.DTO.Region>(region);
                 
@@ -48,6 +48,11 @@ namespace NZWalks.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddRegionAsync([FromBody] AddRegionRequest request) 
         {
+            // Validate data
+            if (!ValidateAddRegionAsync(request)) 
+                return BadRequest(ModelState);
+            
+
             // Request to domain model
             var region = mapper.Map<Models.Domain.Region>(request);
 
@@ -77,6 +82,9 @@ namespace NZWalks.API.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateRegionAsync([FromRoute] Guid id, [FromBody] UpdateRegionRequest request)
         {
+            if (!ValidateUpdateRegionAsync(request))
+                return BadRequest(ModelState);
+
             var region = mapper.Map<Models.Domain.Region>(request);
             var updatedRegion = await regionRepository.UpdateAsync(id, region);
             if (updatedRegion == null)
@@ -86,5 +94,63 @@ namespace NZWalks.API.Controllers
 
             return Ok(updatedRegionDTO);
         }
+
+        #region private methods
+        private bool ValidateAddRegionAsync(AddRegionRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Code))
+            {
+                ModelState.AddModelError(nameof(AddRegionRequest.Code), "Code can't be null or empty or whitespace");
+            }
+
+            if (request.Area <= 0)
+            {
+                ModelState.AddModelError(nameof(AddRegionRequest.Area), "Area can't be null, zero, negative");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                ModelState.AddModelError(nameof(AddRegionRequest.Name), "Name can't be null or empty or whitespace");
+            }
+
+            if (request.Population <= 0)
+            {
+                ModelState.AddModelError(nameof(AddRegionRequest.Population), "Population can't be null, negative or zero");
+            }
+
+            if (ModelState.ErrorCount > 0)
+                return false;
+
+            return true;
+        }
+
+        private bool ValidateUpdateRegionAsync(UpdateRegionRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Code))
+            {
+                ModelState.AddModelError(nameof(AddRegionRequest.Code), "Code can't be null or empty or whitespace");
+            }
+
+            if (request.Area <= 0)
+            {
+                ModelState.AddModelError(nameof(AddRegionRequest.Area), "Area can't be null, zero, negative");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                ModelState.AddModelError(nameof(AddRegionRequest.Name), "Name can't be null or empty or whitespace");
+            }
+
+            if (request.Population <= 0)
+            {
+                ModelState.AddModelError(nameof(AddRegionRequest.Population), "Population can't be null, negative or zero");
+            }
+
+            if (ModelState.ErrorCount > 0)
+                return false;
+
+            return true;
+        }
+        #endregion
     }
 }
